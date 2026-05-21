@@ -1,0 +1,36 @@
+version: "3.9"
+
+services:
+  chat-api:
+    build: ./backend
+    ports:
+      - "3000:3000"
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - REDIS_URL=redis://cache:6379
+    depends_on:
+      - cache
+    networks:
+      - devopsgpt-network
+
+  chat-ui:
+    build: ./frontend
+    ports:
+      - "5173:5173"
+    environment:
+      - VITE_API_URL=http://chat-api:3000
+    depends_on:
+      - chat-api
+    networks:
+      - devopsgpt-network
+
+  cache:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    networks:
+      - devopsgpt-network
+
+networks:
+  devopsgpt-network:
+    driver: bridge
